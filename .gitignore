@@ -3,6 +3,7 @@ build/
 build_win/
 .cache/
 .vscode/
+cache/
 
 # Ejecutables y binarios
 *.exe
@@ -22,3 +23,6 @@ Makefile
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
+
+build/
+build_win/
