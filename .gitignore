@@ -24,5 +24,3 @@ Makefile
 *.vcxproj.filters
 *.vcxproj.user
 
-build/
-build_win/
