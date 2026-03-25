@@ -32,6 +32,7 @@ endif()
 
 # Fuentes
 set(SOURCES
+    src/glad.c
     src/main.cpp
 )
 

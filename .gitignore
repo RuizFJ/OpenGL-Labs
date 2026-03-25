@@ -24,3 +24,4 @@ Makefile
 *.vcxproj.filters
 *.vcxproj.user
 
+build_*/

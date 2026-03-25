@@ -1,12 +1,14 @@
 #include <GL/freeglut.h>
 
+
+//este es un programa hecho con freeglut
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glBegin(GL_TRIANGLES);
 
-    glcolor3f(1.0f, 0.0f, 0.0f);
+    glColor3f(1.0f, 0.0f, 0.0f);
     glVertex2d(0.0f, 0.5f);
 
     glColor3f(0.0f,1.0f,0.0f);

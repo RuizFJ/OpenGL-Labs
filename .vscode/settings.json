@@ -1,5 +1,6 @@
 {
-    "cmake.configureOnOpen": false,
-    "cmake.automaticReconfigure": false,
-    "cmake.setBuildTypeOnMultiConfig": false
+  "cmake.configureOnOpen": false,
+  "cmake.automaticReconfigure": false,
+  "cmake.setBuildTypeOnMultiConfig": false,
+  "C_Cpp.errorSquiggles": "disabled"
 }

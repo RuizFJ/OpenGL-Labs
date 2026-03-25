@@ -1,83 +1,150 @@
-// ============================================================
-// Lección 1: Primera ventana OpenGL con GLUT
-// Dibuja un triángulo RGB en el centro de la pantalla
-// ============================================================
+#include<glad/glad.h>
+#include<GLFW/glfw3.h>
+#include<iostream>
 
-#include <GL/glut.h>   // Incluye OpenGL + GLUT juntos
-
-// ----------------------------------------------------------------
-// FUNCIÓN DE DISPLAY: Se llama cada vez que hay que redibujar
-// ----------------------------------------------------------------
-void display() {
-    // Paso 1: Limpiar el buffer de color (borrar frame anterior)
-    // GL_COLOR_BUFFER_BIT indica que limpiamos los colores
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // Paso 2: Indicar QUÉ vamos a dibujar
-    // GL_TRIANGLES = cada 3 vértices forman un triángulo
-    glBegin(GL_TRIANGLES);
-
-        // Cada vértice tiene un COLOR y una POSICIÓN
-        // glColor3f(R, G, B) → valores entre 0.0 y 1.0
-        // glVertex2f(x, y)   → coordenadas en espacio [-1, 1]
-
-        glColor3f(1.0f, 0.0f, 0.0f);  // Rojo
-        glVertex2f(0.0f,  0.5f);       // Vértice superior (centro-arriba)
-
-        glColor3f(0.0f, 1.0f, 0.0f);  // Verde
-        glVertex2f(-0.5f, -0.5f);      // Vértice inferior izquierdo
-
-        glColor3f(0.0f, 0.0f, 1.0f);  // Azul
-        glVertex2f(0.5f, -0.5f);       // Vértice inferior derecho
-
-    glEnd();  // Fin del grupo de primitivas
-
-    // Paso 3: Mostrar lo dibujado (intercambiar buffers)
-    // glutSwapBuffers mueve el buffer trasero al frente
-    glutSwapBuffers();
+void framebuffer_size_callback(GLFWwindow* window, int width, int height){
+    glViewport(0,0,width,height);
 }
 
-// ----------------------------------------------------------------
-// FUNCIÓN DE RESHAPE: Se llama cuando la ventana cambia de tamaño
-// ----------------------------------------------------------------
-void reshape(int width, int height) {
-    // Decirle a OpenGL el nuevo tamaño del viewport (área de dibujo)
-    // x=0, y=0 desde la esquina inferior izquierda
-    glViewport(0, 0, width, height);
+void processInput(GLFWwindow* window){
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 }
+int main(){
 
-// ----------------------------------------------------------------
-// MAIN: Configuración e inicio del programa
-// ----------------------------------------------------------------
-int main(int argc, char** argv) {
-    // 1. Inicializar GLUT con los argumentos del programa
-    glutInit(&argc, argv);
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
-    // 2. Configurar el modo de display:
-    //    GLUT_DOUBLE = doble buffer (elimina parpadeos)
-    //    GLUT_RGB    = colores en formato RGB
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    GLFWwindow* window = glfwCreateWindow(800,600, "LearnOpenGL", NULL,NULL);
 
-    // 3. Definir tamaño inicial de la ventana (ancho x alto en píxeles)
-    glutInitWindowSize(800, 600);
+    if(window == NULL){
+        std::cout <<"Failed to create GLFW Window" <<std::endl;
+        glfwTerminate();
+        return -1;
+    }
 
-    // 4. Definir posición de la ventana en el escritorio (x, y)
-    glutInitWindowPosition(100, 100);
+    glfwMakeContextCurrent(window);
 
-    // 5. Crear la ventana con un título
-    glutCreateWindow("Mi Primera Ventana OpenGL");
 
-    // 6. Definir el color de fondo al limpiar (R, G, B, Alpha)
-    //    0.1, 0.1, 0.1 = gris muy oscuro (casi negro)
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    //En este parte de codigo, se cargan las funciones de OpenGL utilizando GLAD, que es un cargador de funciones de OpenGL. 
+    //La función gladLoadGLLoader toma como argumento una función que se utiliza para obtener la dirección de las funciones de OpenGL. 
+    //En este caso, se utiliza glfwGetProcAddress, que es una función proporcionada por GLFW para obtener la dirección de las funciones de OpenGL.
+    if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
+        std::cout <<"Failed to initialize GLAD" <<std::endl;
+        return -1;
+    }
 
-    // 7. Registrar los callbacks (funciones que GLUT llamará)
-    glutDisplayFunc(display);   // ¿Qué hacer cuando hay que dibujar?
-    glutReshapeFunc(reshape);   // ¿Qué hacer si la ventana cambia?
+    //* 1.- Mandamos informacion a la GPU
 
-    // 8. Entrar al bucle principal (loop infinito de GLUT)
-    //    Este punto NUNCA retorna hasta que cierras la ventana
-    glutMainLoop();
+    float vertices[] = {
+        -0.5f, -0.5f, 0.0f, // left  
+         0.5f, -0.5f, 0.0f, // right 
+         0.0f,  0.5f, 0.0f  // top
+    };
+    //En esta parte del código, se genera un buffer de vértices (VBO) utilizando la función glGenBuffers.
+    //! Si o si va despues de gladLoadGLLoader, porque es una función de OpenGL y necesita que las funciones de OpenGL estén cargadas para poder ser utilizada.
+    unsigned int VBO;
+    unsigned int VAO; //Vertex Array Object
 
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO); //se vincula el VAO para que las siguientes llamadas a funciones de OpenGL afecten a este VAO
+    glGenBuffers(1, &VBO);
+
+    //Luego, se vincula el buffer de vértices al objetivo GL_ARRAY_BUFFER utilizando la función glBindBuffer.
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    
+
+    //* 2.- Decirle a OpenGL como interpretar los datos de los vértices
+    //En esta parte del código, se especifica cómo OpenGL debe interpretar los datos de los vértices utilizando la función glVertexAttribPointer.
+    //1- El primer argumento (0) es el índice del atributo de vértice que se va a configurar. En este caso, se está configurando el atributo de vértice 0.
+    //2- El segundo argumento (3) es el número de componentes por vértice. En este caso, cada vértice tiene 3 componentes (x, y, z).
+    //3- El tercer argumento (GL_FLOAT) es el tipo de datos de cada componente. En este caso, cada componente es un float.
+    //4- El cuarto argumento (GL_FALSE) indica si los datos deben ser normalizados. En este caso, no se normalizan.
+    //5- El quinto argumento (3*sizeof(float)) es el tamaño en bytes de cada vértice. En este caso, cada vértice tiene 3 componentes de tipo float, por lo que el tamaño es 3 veces el tamaño de un float.
+    //6- El sexto argumento ((void*)0) es un puntero a los datos de los vértices. En este caso, los datos de los vértices comienzan en el inicio del buffer, por lo que se pasa un puntero nulo.
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0); //se habilita el atributo de vértice 0 para que OpenGL pueda usarlo al renderizar
+    glBindVertexArray(0); //se desvincula el VAO para evitar modificarlo accidentalmente en el futuro
+    //* Crear vertex shader y fragment shader
+
+    const char* vertexShaderSource = "#version 400 core\n"
+        "layout (location = 0) in vec3 aPos;\n"
+        "void main()\n"
+        "{\n"
+        "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "}\0";
+
+    const char* fragmentShaderSource = "#version 400 core\n"
+        "out vec4 FragColor;\n"
+        "void main()\n"
+        "{\n"
+        "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "}\n\0";
+
+    unsigned int vertexShader;
+    unsigned int fragmentShader;
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+
+    glCompileShader(vertexShader);
+    glCompileShader(fragmentShader);
+
+    int success;
+    char infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+
+    if(!success){
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        std::cout <<"ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" <<infoLog <<std::endl;
+    }
+
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if(!success){
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        std::cout <<"ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" <<infoLog <<std::endl;
+    }
+
+    //* Crear shader program
+    unsigned int shaderProgram;
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if(!success){
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cout <<"ERROR::SHADER::PROGRAM::LINKING_FAILED\n" <<infoLog <<std::endl;
+    }
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glUseProgram(shaderProgram);
+    while(!glfwWindowShouldClose(window)){
+        glClearColor(0.2f,0.3f,0.3f,1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+
+
+        processInput(window);
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteProgram(shaderProgram);
+    glfwTerminate();
     return 0;
 }
