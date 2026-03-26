@@ -38,24 +38,34 @@ int main(){
     //* 1.- Mandamos informacion a la GPU
 
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f, // left  
-         0.5f, -0.5f, 0.0f, // right 
-         0.0f,  0.5f, 0.0f  // top
+        0.5f, 0.5f, 0.0f, // top right
+        0.5f, -0.5f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f, 0.5f, 0.0f  // top left
     };
+    unsigned int indices[] = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
     //En esta parte del código, se genera un buffer de vértices (VBO) utilizando la función glGenBuffers.
     //! Si o si va despues de gladLoadGLLoader, porque es una función de OpenGL y necesita que las funciones de OpenGL estén cargadas para poder ser utilizada.
     unsigned int VBO;
     unsigned int VAO; //Vertex Array Object
 
+    unsigned int EBO; //Element Buffer Object
+
     glGenVertexArrays(1, &VAO);
 
     glBindVertexArray(VAO); //se vincula el VAO para que las siguientes llamadas a funciones de OpenGL afecten a este VAO
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);  //se genera un buffer de vértices (VBO) y un buffer de elementos (EBO) utilizando la función glGenBuffers. El VBO se utiliza para almacenar los datos de los vértices, mientras que el EBO se utiliza para almacenar los índices que definen cómo se deben dibujar los vértices.
 
     //Luego, se vincula el buffer de vértices al objetivo GL_ARRAY_BUFFER utilizando la función glBindBuffer.
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);\
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); //se vincula el buffer de elementos al objetivo GL_ELEMENT_ARRAY_BUFFER utilizando la función glBindBuffer.
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); //se copia la información de los índices al buffer de elementos utilizando la función glBufferData. El tercer argumento es un puntero a los datos de los índices, y el cuarto argumento indica cómo se deben usar los datos (en este caso, GL_STATIC_DRAW indica que los datos no cambiarán con frecuencia).
 
     //* 2.- Decirle a OpenGL como interpretar los datos de los vértices
     //En esta parte del código, se especifica cómo OpenGL debe interpretar los datos de los vértices utilizando la función glVertexAttribPointer.
@@ -125,16 +135,18 @@ int main(){
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // MODO ALAMBRE: Dibuja solo los bordes de los triángulos
+    
     glUseProgram(shaderProgram);
     while(!glfwWindowShouldClose(window)){
         glClearColor(0.2f,0.3f,0.3f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        //glDrawArrays(GL_TRIANGLES, 0, 6); //Dibuja los triángulos utilizando los vértices en el orden en que fueron definidos en el buffer de vértices. El segundo argumento es el índice del primer vértice a dibujar, y el tercer argumento es el número de vértices a dibujar. En este caso, se dibujan 6 vértices (2 triángulos) comenzando desde el índice 0.
+        //glBindVertexArray(0);
 
 
         processInput(window);
