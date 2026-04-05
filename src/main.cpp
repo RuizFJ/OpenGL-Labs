@@ -82,16 +82,21 @@ int main(){
 
     const char* vertexShaderSource = "#version 400 core\n"
         "layout (location = 0) in vec3 aPos;\n"
+        "out vec3 ourColor;\n"
+        "uniform float mivariable;\n"
         "void main()\n"
         "{\n"
-        "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "   ourColor = vec3(1.0, 0.5, 0.2);\n"
+        "   gl_Position = vec4(aPos.x + mivariable, aPos.y, aPos.z, 1.0);\n"
         "}\0";
 
     const char* fragmentShaderSource = "#version 400 core\n"
         "out vec4 FragColor;\n"
+        "in vec3 ourColor;\n"
+        "uniform float mivariable;\n"
         "void main()\n"
         "{\n"
-        "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "   FragColor = vec4(ourColor, 1.0f);\n"
         "}\n\0";
 
     unsigned int vertexShader;
@@ -139,9 +144,14 @@ int main(){
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // MODO ALAMBRE: Dibuja solo los bordes de los triángulos
     
     glUseProgram(shaderProgram);
+    int location = glGetUniformLocation(shaderProgram, "mivariable");
+    //glUniform1f(location, 0.5f); para mandar un valor a la variable uniforme "mivariable" en el shader. En este caso, se le asigna el valor 0.5f.
     while(!glfwWindowShouldClose(window)){
         glClearColor(0.2f,0.3f,0.3f,1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        float timeValue = glfwGetTime();
+        glUniform1f(location, sin(timeValue));
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
