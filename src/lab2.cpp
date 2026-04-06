@@ -2,7 +2,7 @@
 
 #include <cmath> 
 
- 
+ // this code uses legacy OpenGL functions (glBegin, glVertex, etc.) for simplicity.
 
 void drawRectangle(float x, float y, float width, float height, float r, float g, float b) { 
 

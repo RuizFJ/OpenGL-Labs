@@ -8,6 +8,10 @@
 #include <windows.h>
 #endif
 
+//Este codigo es una configuracion básica para crear una ventana con OpenGL usando GLFW y GLAD, y renderizar un triangulo con colores interpolados 
+// usando shaders escritos en GLSL. Es un punto de partida común para aprender OpenGL moderno.
+
+
 // Resuelve rutas relativas a partir del directorio del ejecutable.
 // Necesario en Windows para que los shaders se encuentren sin importar
 // desde dónde se lance el programa.
